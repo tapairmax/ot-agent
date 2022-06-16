@@ -167,7 +167,11 @@ class DriverConfigBuilder(BaseDriverConfigBuilder):
 
     def __init__(self, aws_region) -> None:
         self.config = {}
-        self.rds_client = AwsWrapper.rds_client(aws_region)
+        if aws_region != "none":
+            self.rds_client = AwsWrapper.rds_client(aws_region)
+        else:
+            self.rds_client = None
+            
         self.has_determined_db_type = False
 
     def from_file(self, config_path: str) -> BaseDriverConfigBuilder:
@@ -210,13 +214,22 @@ class DriverConfigBuilder(BaseDriverConfigBuilder):
             )
             raise DriverConfigException(msg, ex) from ex
 
+        """TODO Manage host information when RDS is not used ?
+        if not self.rds_client:
+            db_host = args.db_host
+            db_port = 
+            db_version = 
+            db_type = 
+            self.has_determined_db_type = True
+         """
+            
         self.config.update(from_cli)
         return self
 
     def from_env_vars(self):
         """build config options from environment variables"""
         db_name = os.getenv("POSTGRES_OTTERTUNE_DB_NAME", None)
-
+        
         if not self.has_determined_db_type:
             msg = "Builder must know db type before from_env_vars, try running from_rds first"
             raise DriverConfigException(msg)
@@ -233,7 +246,7 @@ class DriverConfigBuilder(BaseDriverConfigBuilder):
                 db_name = None
 
         config_from_env = {
-            "db_name": db_name
+            "db_name": db_name,
         }
 
         try:
@@ -247,10 +260,15 @@ class DriverConfigBuilder(BaseDriverConfigBuilder):
             raise DriverConfigException(msg, ex) from ex
 
         self.config.update(partial_config_from_env)
+        
         return self
 
     def from_rds(self, db_instance_identifier) -> BaseDriverConfigBuilder:
         """build config options from rds description of database"""
+        
+        if not self.rds_client:
+            return self
+        
         config_from_rds = {
             "db_host": get_db_hostname(db_instance_identifier, self.rds_client),
             "db_port": get_db_port(db_instance_identifier, self.rds_client),
@@ -285,6 +303,9 @@ class DriverConfigBuilder(BaseDriverConfigBuilder):
            db_version = 10_x / 11_x / 12_x
            db_type = aurora_postgresql
         """
+        if not self.rds_client:
+            return self
+        
         db_version = get_db_version(db_instance_identifier, self.rds_client)
         db_type = get_db_type(db_instance_identifier, self.rds_client)
 
@@ -315,6 +336,9 @@ class DriverConfigBuilder(BaseDriverConfigBuilder):
 
     def from_cloudwatch_metrics(self, db_instance_identifier) -> BaseDriverConfigBuilder:
         """Build config options from cloudwatch metrics configurations"""
+        if not self.rds_client:
+            return self
+        
         metric_names = []
         file_path = self._get_cloudwatch_metrics_file(db_instance_identifier)
         with open(file_path, "r", encoding="utf-8") as metrics_file:
