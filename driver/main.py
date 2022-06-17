@@ -5,6 +5,7 @@ executions of monitoring and tuning pipeline.
 
 import argparse
 import logging
+import sys
 
 from apscheduler.schedulers.background import BlockingScheduler
 
@@ -19,7 +20,7 @@ from driver.pipeline import (
 scheduler = BlockingScheduler()
 
 
-def _get_args() -> argparse.Namespace:
+def _get_args(myargs) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Provide driver configuration")
     parser.add_argument(
         "--log-verbosity",
@@ -82,6 +83,30 @@ def _get_args() -> argparse.Namespace:
         default="False",
         help="Whether to collect stats for table level analysis or not.",
     )
+    '''Arguments to provide when RDS is not used or available (AWS region set to none)'''
+    parser.add_argument(
+        "--db-host",
+        type=str,
+        help="Database hostname used when AWS region is none",
+    )
+    parser.add_argument(
+        "--db-port",
+        type=int,
+        help="Database port number used when AWS region is none",
+    )
+    parser.add_argument(
+        "--db-version",
+        type=str,
+        help="Database version used when AWS region is none",
+    )
+    parser.add_argument(
+        "--db-type",
+        type=str,
+        default="undef",
+        help="Database type (mysql or postgres) used when AWS region is none",
+    )
+    
+    '''Override arguments normaly set in config file'''
     parser.add_argument(
         "--override-monitor-interval",
         type=int,
@@ -102,7 +127,8 @@ def _get_args() -> argparse.Namespace:
         type=int,
         help="Override file setting for how often to collect table level data (in seconds)",
     )
-    return parser.parse_args()
+    print(myargs)
+    return parser.parse_args(myargs)
 
 
 def schedule_db_level_monitor_job(config) -> None:
@@ -148,7 +174,8 @@ def run() -> None:
     The main entrypoint for the driver
     """
 
-    args = _get_args()
+    print(sys.argv)
+    args = _get_args(sys.argv)
 
     loglevel = args.log_verbosity
     numeric_level = getattr(logging, loglevel.upper(), None)

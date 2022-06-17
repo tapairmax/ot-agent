@@ -109,6 +109,12 @@ class PartialConfigFromCommandline(BaseModel):  # pyre-ignore[13]: pydantic unin
 
     disable_table_level_stats: StrictBool = False
 
+    """Used when RDS is not used or available (AWS region is none)"""
+    db_host: StrictStr
+    db_port: StrictInt
+    db_version: StrictStr
+    db_type: StrictStr
+
 
 class PartialConfigFromRDS(BaseModel):  # pyre-ignore[13]: pydantic uninitialized variables
     """Driver options fetched from RDS for agent deployment.
@@ -206,6 +212,10 @@ class DriverConfigBuilder(BaseDriverConfigBuilder):
                 db_key=args.db_key,
                 organization_id=args.organization_id,
                 disable_table_level_stats=args.disable_table_level_stats.lower() == "true",
+                db_host = args.db_host,
+                db_port = args.db_port,
+                db_version = args.db_version,
+                db_type = args.db_type,
             )
         except ValidationError as ex:
             msg = (
@@ -214,16 +224,11 @@ class DriverConfigBuilder(BaseDriverConfigBuilder):
             )
             raise DriverConfigException(msg, ex) from ex
 
-        """TODO Manage host information when RDS is not used ?
-        if not self.rds_client:
-            db_host = args.db_host
-            db_port = 
-            db_version = 
-            db_type = 
-            self.has_determined_db_type = True
-         """
-            
         self.config.update(from_cli)
+
+        if args.db_type != "undef":
+            self.has_determined_db_type = True
+        
         return self
 
     def from_env_vars(self):
@@ -336,7 +341,11 @@ class DriverConfigBuilder(BaseDriverConfigBuilder):
 
     def from_cloudwatch_metrics(self, db_instance_identifier) -> BaseDriverConfigBuilder:
         """Build config options from cloudwatch metrics configurations"""
+
         if not self.rds_client:
+            self.config.update(
+                {"metrics_to_retrieve_from_source": {}}
+            )
             return self
         
         metric_names = []
