@@ -127,8 +127,8 @@ def _get_args(myargs) -> argparse.Namespace:
         type=int,
         help="Override file setting for how often to collect table level data (in seconds)",
     )
-    print(myargs)
-    return parser.parse_args(myargs)
+
+    return parser.parse_args(args=myargs)
 
 
 def schedule_db_level_monitor_job(config) -> None:
@@ -168,15 +168,7 @@ def get_config(args):
 
     return config
 
-
-def run() -> None:
-    """
-    The main entrypoint for the driver
-    """
-
-    print(sys.argv)
-    args = _get_args(sys.argv)
-
+def _run_with_namespace(args: argparse.Namespace):
     loglevel = args.log_verbosity
     numeric_level = getattr(logging, loglevel.upper(), None)
     if not isinstance(numeric_level, int):
@@ -189,6 +181,18 @@ def run() -> None:
     if not config.disable_table_level_stats:
         schedule_table_level_monitor_job(config)
     scheduler.start()
+
+    
+def run(argslist=[]) -> None:
+    """
+    The main entrypoint for the driver
+    """
+    if len(argslist) == 0:
+        args = _get_args(sys.argv[1:])
+    else:
+        args = _get_args(argslist)
+        
+    _run_with_namespace(args)
 
 
 if __name__ == "__main__":
