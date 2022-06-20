@@ -168,7 +168,7 @@ def get_config(args):
 
     return config
 
-def _run_with_namespace(args: argparse.Namespace):
+def _run_from_namespace(args: argparse.Namespace):
     loglevel = args.log_verbosity
     numeric_level = getattr(logging, loglevel.upper(), None)
     if not isinstance(numeric_level, int):
@@ -192,7 +192,7 @@ def run(argslist=[]) -> None:
     else:
         args = _get_args(argslist)
         
-    _run_with_namespace(args)
+    _run_from_namespace(args)
 
 
 if __name__ == "__main__":
