@@ -22,7 +22,8 @@ To run the Agent, you will need an environment with `Python 3.8+`.
 
 Install python dependencies:
 ```
-pip install -r requirements.txt
+pip install --upgrade pip
+python3 -m pip install -r requirements.txt
 ```
 
 Ensure your aws env vars are set: `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY`
