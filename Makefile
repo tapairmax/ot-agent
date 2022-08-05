@@ -1,5 +1,8 @@
-VERSION := 0.1.0
-REPO := ottertune/agent
+
+include otagent.env
+
+VERSION := ${OTAGENT_IMAGE_VERSION}
+REPO := ${OTAGENT_IMAGE_NAME}
 VERSION_TAG := $(REPO):$(VERSION)
 LATEST_TAG := $(REPO):latest
 
