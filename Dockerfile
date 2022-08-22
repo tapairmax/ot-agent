@@ -17,6 +17,8 @@ ENV OTTERTUNE_OVERRIDE_SERVER_URL="http://localhost:8080"
 ENV OTTERTUNE_OVERRIDE_NUM_TABLE_TO_COLLECT_STATS="1000"
 ENV OTTERTUNE_OVERRIDE_TABLE_LEVEL_MONITOR_INTERVAL="3600"
 ENV OTTERTUNE_DISABLE_TABLE_LEVEL_STATS="False"
+ENV OTTERTUNE_DB_IDENTIFIER="adbms"
+ENV OTTERTUNE_DB_USERNAME ${OTTERTUNE_DB_USERNAME}
 
 RUN mkdir -p /ottertune/driver
 COPY . /ottertune/driver
@@ -30,7 +32,9 @@ RUN cp /usr/lib/ssl/openssl.cnf /usr/lib/ssl/openssl_cipher1.cnf && \
 
 RUN pip install -r requirements.txt
 
-CMD python3 -m driver.main --config ./driver/config/driver_config.yaml --aws-region $AWS_REGION --db-identifier $OTTERTUNE_DB_IDENTIFIER  --db-username $OTTERTUNE_DB_USERNAME --db-password $OTTERTUNE_DB_PASSWORD --api-key $OTTERTUNE_API_KEY --db-key $OTTERTUNE_DB_KEY --organization-id $OTTERTUNE_ORG_ID --override-server-url $OTTERTUNE_OVERRIDE_SERVER_URL \
+CMD python3 -m driver.main --config ./driver/config/driver_config.yaml --aws-region "none" \
+  --db-identifier $OTTERTUNE_DB_IDENTIFIER  --db-username $OTTERTUNE_DB_USERNAME --db-password $OTTERTUNE_DB_PASSWORD \
+  --api-key $OTTERTUNE_API_KEY --db-key $OTTERTUNE_DB_KEY --organization-id $OTTERTUNE_ORG_ID --override-server-url $OTTERTUNE_OVERRIDE_SERVER_URL \
   --override-num-table-to-collect-stats $OTTERTUNE_OVERRIDE_NUM_TABLE_TO_COLLECT_STATS \
   --override-table-level-monitor-interval $OTTERTUNE_OVERRIDE_TABLE_LEVEL_MONITOR_INTERVAL \
   --disable-table-level-stats $OTTERTUNE_DISABLE_TABLE_LEVEL_STATS
