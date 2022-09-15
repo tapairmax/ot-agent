@@ -14,6 +14,13 @@
 
 ----
 
+# This forked version
+
+- Option to disable dependency uppon AWS services (AWS_REGION="none", CloudWatch, ...)
+- Adaptations to work with MariaDB:
+  - Missing: performance_schema.events_statements_histogram_global
+  - 
+
 # Development
 
 ## Setup
