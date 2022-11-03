@@ -7,7 +7,7 @@
 
 # URL of the OtterTune server that the driver communicates with
 #server_url: 'https://api.ottertune.com'
-server_url: 'http://adbms-autotuning-poc-webcollect:8080'
+server_url: 'http://httpcollector.local:8080'
 
 # ====================================================================
 #  METRICS OPTIONS
