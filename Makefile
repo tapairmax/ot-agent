@@ -30,6 +30,8 @@ test:
 docker: 
 	docker build . -t $(VERSION_TAG) -t $(LATEST_TAG)
 
+build: docker
+
 # Publish a new Docker image to Dockerhub.
 publish:
 	docker buildx build --platform linux/amd64,linux/arm64 -t $(VERSION_TAG) -t $(LATEST_TAG) --push .
